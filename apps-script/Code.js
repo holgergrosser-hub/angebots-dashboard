@@ -29,6 +29,10 @@ function doGet(e) {
         if (!query) throw new Error('query fehlt');
         response = searchCustomers(query);
         break;
+
+      case 'getToday':
+        response = getTodayOffersAllSheets_(e.parameter.nocache === '1');
+        break;
       
       default:
         throw new Error('Unbekannte Action: ' + action);
@@ -101,6 +105,90 @@ function getSheetStats(sheetId) {
   cache.put(cacheKey, JSON.stringify(stats), 600);
   
   return stats;
+}
+
+/**
+ * Aggregierte "Heute"-Ãœbersicht Ã¼ber alle aktiven implying Sheets.
+ * Optional: nocache=1 (bypassed ScriptCache)
+ */
+function getTodayOffersAllSheets_(nocache) {
+  const dayKey = Utilities.formatDate(new Date(), CONFIG.TIMEZONE, 'yyyy-MM-dd');
+  const cacheKey = `today_${dayKey}`;
+  const cache = CacheService.getScriptCache();
+
+  if (!nocache) {
+    const cached = cache.get(cacheKey);
+    if (cached) {
+      return JSON.parse(cached);
+    }
+  }
+
+  const sheets = CONFIG.SHEETS.filter(s => s.aktiv);
+  const perSheet = [];
+  const offers = [];
+  let totalCount = 0;
+  let totalSum = 0;
+
+  sheets.forEach(cfg => {
+    try {
+      const data = getSheetData(cfg.sheetId);
+      const today = calculatePeriodStats(data, 'today');
+      const items = Array.isArray(today.angebote) ? today.angebote : [];
+
+      const count = Number(today.anzahl || items.length) || 0;
+      const sum = Number(today.summe) || 0;
+      totalCount += count;
+      totalSum += sum;
+
+      items.forEach(it => {
+        offers.push({
+          sheetId: cfg.sheetId,
+          sheetName: cfg.sheetName,
+          inputUrl: cfg.inputUrl || '',
+          offerUrl: cfg.offerUrl || '',
+          datum: it.datum,
+          kundenname: it.kundenname,
+          betrag: it.betrag,
+          status: it.status
+        });
+      });
+
+      perSheet.push({
+        sheetId: cfg.sheetId,
+        sheetName: cfg.sheetName,
+        inputUrl: cfg.inputUrl || '',
+        offerUrl: cfg.offerUrl || '',
+        anzahl: count,
+        summe: sum,
+        angebote: items
+      });
+    } catch (err) {
+      Logger.log(`Fehler getTodayOffers fÃ¼r ${cfg.sheetName}: ${err}`);
+      perSheet.push({
+        sheetId: cfg.sheetId,
+        sheetName: cfg.sheetName,
+        inputUrl: cfg.inputUrl || '',
+        offerUrl: cfg.offerUrl || '',
+        anzahl: 0,
+        summe: 0,
+        angebote: [],
+        error: String(err)
+      });
+    }
+  });
+
+  const result = {
+    success: true,
+    date: dayKey,
+    total: { anzahl: totalCount, summe: totalSum },
+    sheets: perSheet,
+    offers: offers,
+    generatedAt: new Date().toISOString()
+  };
+
+  // Short cache: 60s (keeps it fast, still updates quickly)
+  cache.put(cacheKey, JSON.stringify(result), 60);
+  return result;
 }
 
 /**

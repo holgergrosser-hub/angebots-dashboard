@@ -1,10 +1,37 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
+import { fetchAPI, formatCurrency, formatDate } from '../api/client'
 import SheetCard from './SheetCard'
 import SheetDetail from './SheetDetail'
 
 export default function Dashboard({ sheets }) {
   const [selectedSheet, setSelectedSheet] = useState(null)
   const detailRef = useRef(null)
+
+  const [today, setToday] = useState(null)
+  const [todayLoading, setTodayLoading] = useState(false)
+  const [todayError, setTodayError] = useState(null)
+
+  const todayOffers = useMemo(() => {
+    return Array.isArray(today?.offers) ? today.offers : []
+  }, [today])
+
+  async function loadToday(nocache = false) {
+    try {
+      setTodayLoading(true)
+      setTodayError(null)
+      const res = await fetchAPI('getToday', nocache ? { nocache: '1' } : {})
+      if (res?.success) {
+        setToday(res)
+      } else {
+        throw new Error(res?.error || 'Fehler beim Laden der Heute-Ãœbersicht')
+      }
+    } catch (err) {
+      setToday(null)
+      setTodayError(err?.message || String(err))
+    } finally {
+      setTodayLoading(false)
+    }
+  }
 
   // Optional: open a sheet directly via URL (?sheet=...)
   useEffect(() => {
@@ -13,6 +40,16 @@ export default function Dashboard({ sheets }) {
     const match = sheets.find(s => s.id === sheetId)
     if (match) setSelectedSheet(match)
   }, [sheets])
+
+  useEffect(() => {
+    if (!Array.isArray(sheets) || sheets.length === 0) {
+      setToday(null)
+      setTodayError(null)
+      return
+    }
+    loadToday(false)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sheets.length])
 
   useEffect(() => {
     if (!selectedSheet) return
@@ -40,6 +77,104 @@ export default function Dashboard({ sheets }) {
 
   return (
     <div>
+      {/* Heute-Ãœbersicht */}
+      <div className="mb-10">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">Heute</h2>
+            <p className="text-gray-600 mt-1">
+              Alle Angebote aus allen Sheets (heutiges Datum)
+            </p>
+          </div>
+          <button
+            onClick={() => loadToday(true)}
+            className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50"
+            title="Heute neu laden"
+          >
+            Aktualisieren
+          </button>
+        </div>
+
+        {todayLoading ? (
+          <div className="mt-6 bg-white rounded-lg shadow p-6 text-gray-600">Lade Heute-Ãœbersicht...</div>
+        ) : todayError ? (
+          <div className="mt-6 bg-red-50 border border-red-200 rounded-lg p-6">
+            <p className="text-red-800">{todayError}</p>
+          </div>
+        ) : (
+          <div className="mt-6 bg-white rounded-lg shadow overflow-hidden">
+            <div className="p-6 border-b border-gray-100">
+              <div className="flex flex-wrap items-center gap-6">
+                <div>
+                  <p className="text-sm text-gray-500">Anzahl</p>
+                  <p className="text-2xl font-bold text-gray-900">{today?.total?.anzahl ?? todayOffers.length}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Summe</p>
+                  <p className="text-2xl font-bold text-gray-900">{formatCurrency(today?.total?.summe ?? 0)}</p>
+                </div>
+                {today?.date && (
+                  <div>
+                    <p className="text-sm text-gray-500">Datum</p>
+                    <p className="text-sm font-medium text-gray-900">{formatDate(today.date)}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {todayOffers.length === 0 ? (
+              <div className="p-10 text-center text-gray-600">Keine Angebote von heute gefunden.</div>
+            ) : (
+              <div className="divide-y divide-gray-100">
+                {todayOffers.map((o, idx) => (
+                  <div key={idx} className="p-6">
+                    <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                      <div className="flex-1">
+                        <p className="text-sm text-gray-500">{o.sheetName}</p>
+                        <p className="font-semibold text-gray-900">{o.kundenname}</p>
+                        <div className="flex flex-wrap items-center gap-3 mt-2">
+                          <span className="text-sm text-gray-500">{formatDate(o.datum)}</span>
+                          {o.status ? (
+                            <span className="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">{o.status}</span>
+                          ) : null}
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-3 mt-3">
+                          {o.inputUrl ? (
+                            <a
+                              href={o.inputUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-sm text-primary-600 hover:text-primary-700"
+                            >
+                              Eingabe
+                            </a>
+                          ) : null}
+                          {o.offerUrl ? (
+                            <a
+                              href={o.offerUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-sm text-primary-600 hover:text-primary-700"
+                            >
+                              Sheet
+                            </a>
+                          ) : null}
+                        </div>
+                      </div>
+
+                      <div className="text-right">
+                        <p className="text-lg font-bold text-gray-900">{formatCurrency(o.betrag)}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-gray-900">Alle Sheets</h2>
         <p className="text-gray-600 mt-1">
