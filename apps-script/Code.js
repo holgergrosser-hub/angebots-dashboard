@@ -50,7 +50,7 @@ function doGet(e) {
 // =============================================================================
 
 /**
- * Gibt Liste aller konfigurierten Sheets zurück
+ * Gibt Liste aller konfigurierten Sheets zurÃ¼ck
  */
 function getSheetsList() {
   const sheets = CONFIG.SHEETS.filter(s => s.aktiv);
@@ -67,16 +67,16 @@ function getSheetsList() {
 }
 
 /**
- * Berechnet Statistiken für ein Sheet
+ * Berechnet Statistiken fÃ¼r ein Sheet
  */
 function getSheetStats(sheetId) {
   const cacheKey = `stats_${sheetId}_${Utilities.formatDate(new Date(), CONFIG.TIMEZONE, 'yyyy-MM-dd')}`;
   const cache = CacheService.getScriptCache();
   
-  // Cache prüfen
+  // Cache prÃ¼fen
   const cached = cache.get(cacheKey);
   if (cached) {
-    Logger.log('Cache Hit für: ' + cacheKey);
+    Logger.log('Cache Hit fÃ¼r: ' + cacheKey);
     return JSON.parse(cached);
   }
   
@@ -104,7 +104,7 @@ function getSheetStats(sheetId) {
 }
 
 /**
- * Sucht nach Kunden über alle Sheets
+ * Sucht nach Kunden Ã¼ber alle Sheets
  */
 function searchCustomers(query) {
   const results = [];
@@ -149,7 +149,7 @@ function searchCustomers(query) {
 // =============================================================================
 
 /**
- * Lädt Daten aus einem Sheet
+ * LÃ¤dt Daten aus einem Sheet
  */
 function getSheetData(sheetId) {
   const sheetConfig = CONFIG.SHEETS.find(s => s.sheetId === sheetId);
@@ -186,7 +186,7 @@ function getSheetData(sheetId) {
 }
 
 /**
- * Berechnet Stats für einen Zeitraum
+ * Berechnet Stats fÃ¼r einen Zeitraum
  */
 function calculatePeriodStats(data, period) {
   const now = new Date();
@@ -237,7 +237,7 @@ function calculatePeriodStats(data, period) {
     endDate: Utilities.formatDate(endDate, CONFIG.TIMEZONE, 'yyyy-MM-dd')
   };
   
-  // Bei "heute" auch die Liste der Angebote zurückgeben
+  // Bei "heute" auch die Liste der Angebote zurÃ¼ckgeben
   if (period === 'today') {
     result.angebote = filtered.map(row => ({
       datum: Utilities.formatDate(row.datum, CONFIG.TIMEZONE, 'yyyy-MM-dd'),
@@ -284,10 +284,91 @@ function parseDate(value) {
 }
 
 /**
- * Erstellt JSON-Response für Web App
+ * Erstellt JSON-Response fÃ¼r Web App
  */
 function createJsonResponse(data) {
   return ContentService
     .createTextOutput(JSON.stringify(data))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+// =====================================================================
+// SETUP (einmalig ausführen)
+// =====================================================================
+
+/**
+ * Legt alle in CONFIG.SHEETS definierten Tabs an (falls sie fehlen)
+ * und schreibt die Header-Zeile (nur wenn Tab leer ist).
+ *
+ * Ausführen (lokal): clasp run setupOfferTabs
+ * Danach im Apps Script UI das Web-App Deployment aktualisieren.
+ */
+function setupOfferTabs() {
+  const requiredHeaders = [
+    CONFIG.COLUMNS.DATUM,
+    CONFIG.COLUMNS.KUNDENNAME,
+    CONFIG.COLUMNS.BETRAG,
+    CONFIG.COLUMNS.STATUS
+  ];
+
+  // Group by spreadsheetId to avoid repeated openById
+  const groups = {};
+  CONFIG.SHEETS.forEach(s => {
+    if (!s.aktiv) return;
+    if (!groups[s.spreadsheetId]) groups[s.spreadsheetId] = [];
+    groups[s.spreadsheetId].push(s);
+  });
+
+  Object.keys(groups).forEach(spreadsheetId => {
+    const ss = SpreadsheetApp.openById(spreadsheetId);
+    groups[spreadsheetId].forEach(cfg => {
+      const sheet = ensureTab_(ss, cfg.tabName);
+      ensureHeaderIfEmpty_(sheet, requiredHeaders);
+      formatColumns_(sheet, requiredHeaders);
+    });
+  });
+
+  return { success: true, message: 'Tabs geprüft/angelegt.' };
+}
+
+function ensureTab_(spreadsheet, tabName) {
+  let sheet = spreadsheet.getSheetByName(tabName);
+  if (!sheet) {
+    sheet = spreadsheet.insertSheet(tabName);
+  }
+  return sheet;
+}
+
+function ensureHeaderIfEmpty_(sheet, headers) {
+  const lastRow = sheet.getLastRow();
+  const lastCol = sheet.getLastColumn();
+
+  if (lastRow === 0 || lastCol === 0) {
+    sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+    sheet.setFrozenRows(1);
+    return;
+  }
+
+  const firstRow = sheet.getRange(1, 1, 1, Math.max(lastCol, headers.length)).getValues()[0];
+  const hasAny = firstRow.some(v => String(v || '').trim() !== '');
+  if (!hasAny) {
+    sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+    sheet.setFrozenRows(1);
+  }
+}
+
+function formatColumns_(sheet, headers) {
+  // Format Betrag column as currency if present
+  const betragIndex = headers.indexOf(CONFIG.COLUMNS.BETRAG);
+  if (betragIndex !== -1) {
+    const col = betragIndex + 1;
+    sheet.getRange(2, col, Math.max(sheet.getMaxRows() - 1, 1), 1).setNumberFormat('#,##0.00 €');
+  }
+
+  // Format Datum column as date if present
+  const datumIndex = headers.indexOf(CONFIG.COLUMNS.DATUM);
+  if (datumIndex !== -1) {
+    const col = datumIndex + 1;
+    sheet.getRange(2, col, Math.max(sheet.getMaxRows() - 1, 1), 1).setNumberFormat('dd.MM.yyyy');
+  }
 }
