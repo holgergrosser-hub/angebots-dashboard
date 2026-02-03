@@ -14,6 +14,7 @@ function AppInner() {
 
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState(null)
+  const [searchError, setSearchError] = useState(null)
 
   const sheetCountLabel = useMemo(() => {
     const count = sheets.length
@@ -42,23 +43,28 @@ function AppInner() {
   async function handleSearch(query) {
     const nextQuery = (query || '').trim()
     setSearchQuery(nextQuery)
+    setSearchError(null)
 
     if (!nextQuery) {
       setSearchResults(null)
+      setSearchError(null)
       return
     }
 
     try {
-      const res = await fetchAPI('search', { q: nextQuery })
-      setSearchResults(res?.data || { results: [] })
+      const res = await fetchAPI('search', { query: nextQuery })
+      const list = Array.isArray(res?.data) ? res.data : []
+      setSearchResults(list)
     } catch (err) {
-      setSearchResults({ results: [], error: err?.message || 'Suche fehlgeschlagen' })
+      setSearchResults([])
+      setSearchError(err?.message || 'Suche fehlgeschlagen')
     }
   }
 
   function clearSearch() {
     setSearchQuery('')
     setSearchResults(null)
+    setSearchError(null)
   }
 
   if (loading) {
@@ -128,7 +134,7 @@ function AppInner() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {searchResults ? (
-          <SearchResults results={searchResults} query={searchQuery} onClear={clearSearch} />
+          <SearchResults results={searchResults} query={searchQuery} error={searchError} onClear={clearSearch} />
         ) : (
           <Dashboard sheets={sheets} />
         )}
