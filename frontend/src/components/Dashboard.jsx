@@ -1,15 +1,51 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import SheetCard from './SheetCard'
 import SheetDetail from './SheetDetail'
 
 export default function Dashboard({ sheets }) {
   const [selectedSheet, setSelectedSheet] = useState(null)
 
+  // Keep UI in sync with URL so browser back/forward works
+  useEffect(() => {
+    const syncFromUrl = () => {
+      const sheetId = new URLSearchParams(window.location.search).get('sheet')
+      if (!sheetId) {
+        setSelectedSheet(null)
+        return
+      }
+
+      const match = sheets.find(s => s.id === sheetId)
+      if (match) setSelectedSheet(match)
+    }
+
+    syncFromUrl()
+
+    const onPopState = () => syncFromUrl()
+    window.addEventListener('popstate', onPopState)
+    return () => window.removeEventListener('popstate', onPopState)
+  }, [sheets])
+
+  const openSheet = (sheet) => {
+    setSelectedSheet(sheet)
+    const url = new URL(window.location.href)
+    url.searchParams.set('sheet', sheet.id)
+    window.history.pushState({}, '', url)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const closeSheet = () => {
+    const url = new URL(window.location.href)
+    url.searchParams.delete('sheet')
+    window.history.pushState({}, '', url)
+    setSelectedSheet(null)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   if (selectedSheet) {
     return (
-      <SheetDetail 
-        sheet={selectedSheet} 
-        onBack={() => setSelectedSheet(null)}
+      <SheetDetail
+        sheet={selectedSheet}
+        onBack={closeSheet}
       />
     )
   }
@@ -36,10 +72,10 @@ export default function Dashboard({ sheets }) {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {sheets.map(sheet => (
-            <SheetCard 
+            <SheetCard
               key={sheet.id}
               sheet={sheet}
-              onClick={() => setSelectedSheet(sheet)}
+              onClick={() => openSheet(sheet)}
             />
           ))}
         </div>
