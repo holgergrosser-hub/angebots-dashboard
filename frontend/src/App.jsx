@@ -25,7 +25,7 @@ function AppInner() {
       setLoading(true)
       setError(null)
 
-      const res = await fetchAPI('/api', { action: 'getSheets' })
+      const res = await fetchAPI('getSheets')
       const list = Array.isArray(res?.data) ? res.data : []
       setSheets(list)
     } catch (err) {
@@ -49,7 +49,7 @@ function AppInner() {
     }
 
     try {
-      const res = await fetchAPI('/api', { action: 'search', q: nextQuery })
+      const res = await fetchAPI('search', { q: nextQuery })
       setSearchResults(res?.data || { results: [] })
     } catch (err) {
       setSearchResults({ results: [], error: err?.message || 'Suche fehlgeschlagen' })
@@ -152,3 +152,4 @@ export default function App() {
     </ErrorBoundary>
   )
 }
+
