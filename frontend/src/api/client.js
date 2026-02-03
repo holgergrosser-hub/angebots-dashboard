@@ -1,5 +1,5 @@
-/**
- * API Client fÃ¼r Google Apps Script Backend
+﻿/**
+ * API Client fÃƒÂ¼r Google Apps Script Backend
  * 
  * WICHTIG: Nach Apps Script Deployment die URL hier eintragen!
  */
@@ -8,10 +8,10 @@
 const API_URL = import.meta.env.VITE_API_URL || '/api'
 
 /**
- * FÃ¼hrt einen API-Call zum Apps Script Backend aus
+ * FÃƒÂ¼hrt einen API-Call zum Apps Script Backend aus
  * 
  * @param {string} action - API Action (z.B. 'getSheets', 'getStats', 'search')
- * @param {object} params - ZusÃ¤tzliche Parameter
+ * @param {object} params - ZusÃƒÂ¤tzliche Parameter
  * @returns {Promise<object>} API Response
  */
 export async function fetchAPI(action, params = {}) {
@@ -50,7 +50,7 @@ export async function fetchAPI(action, params = {}) {
 }
 
 /**
- * LÃ¤dt Statistiken fÃ¼r ein bestimmtes Sheet
+ * LÃƒÂ¤dt Statistiken fÃƒÂ¼r ein bestimmtes Sheet
  * 
  * @param {string} sheetId - Sheet-ID
  * @returns {Promise<object>} Statistik-Daten
@@ -60,7 +60,7 @@ export async function getSheetStats(sheetId) {
 }
 
 /**
- * Sucht nach Kunden Ã¼ber alle Sheets
+ * Sucht nach Kunden ÃƒÂ¼ber alle Sheets
  * 
  * @param {string} query - Suchbegriff
  * @returns {Promise<object>} Suchergebnisse
@@ -70,10 +70,10 @@ export async function searchCustomers(query) {
 }
 
 /**
- * Formatiert Betrag als WÃ¤hrung
+ * Formatiert Betrag als WÃƒÂ¤hrung
  * 
  * @param {number} amount - Betrag
- * @param {string} currency - WÃ¤hrungscode (Standard: EUR)
+ * @param {string} currency - WÃƒÂ¤hrungscode (Standard: EUR)
  * @returns {string} Formatierter Betrag
  */
 export function formatCurrency(amount, currency = 'EUR') {
@@ -91,7 +91,8 @@ export function formatCurrency(amount, currency = 'EUR') {
  */
 export function formatDate(dateString) {
   const date = new Date(dateString)
-  return new Intl.DateFormat('de-DE').format(date)
+  return new Intl.DateTimeFormat('de-DE').format(date)
 }
+
 
 
