@@ -1,4 +1,4 @@
-﻿/**
+/**
  * API Client fÃ¼r Google Apps Script Backend
  * 
  * WICHTIG: Nach Apps Script Deployment die URL hier eintragen!
@@ -17,7 +17,7 @@ const API_URL = import.meta.env.VITE_API_URL || '/api'
 export async function fetchAPI(action, params = {}) {
   try {
     // URL mit Query-Parametern bauen
-    const url = new URL(API_URL)
+    const url = new URL(API_URL, window.location.origin)
     url.searchParams.append('action', action)
     
     Object.entries(params).forEach(([key, value]) => {
@@ -93,4 +93,5 @@ export function formatDate(dateString) {
   const date = new Date(dateString)
   return new Intl.DateFormat('de-DE').format(date)
 }
+
 
