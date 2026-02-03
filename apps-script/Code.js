@@ -50,7 +50,7 @@ function doGet(e) {
 // =============================================================================
 
 /**
- * Gibt Liste aller konfigurierten Sheets zurÃ¼ck
+ * Gibt Liste aller konfigurierten Sheets zurÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¼ck
  */
 function getSheetsList() {
   const sheets = CONFIG.SHEETS.filter(s => s.aktiv);
@@ -67,16 +67,16 @@ function getSheetsList() {
 }
 
 /**
- * Berechnet Statistiken fÃ¼r ein Sheet
+ * Berechnet Statistiken fÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¼r ein Sheet
  */
 function getSheetStats(sheetId) {
   const cacheKey = `stats_${sheetId}_${Utilities.formatDate(new Date(), CONFIG.TIMEZONE, 'yyyy-MM-dd')}`;
   const cache = CacheService.getScriptCache();
   
-  // Cache prÃ¼fen
+  // Cache prÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¼fen
   const cached = cache.get(cacheKey);
   if (cached) {
-    Logger.log('Cache Hit fÃ¼r: ' + cacheKey);
+    Logger.log('Cache Hit fÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¼r: ' + cacheKey);
     return JSON.parse(cached);
   }
   
@@ -104,7 +104,7 @@ function getSheetStats(sheetId) {
 }
 
 /**
- * Sucht nach Kunden Ã¼ber alle Sheets
+ * Sucht nach Kunden ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¼ber alle Sheets
  */
 function searchCustomers(query) {
   const results = [];
@@ -149,7 +149,7 @@ function searchCustomers(query) {
 // =============================================================================
 
 /**
- * LÃ¤dt Daten aus einem Sheet
+ * LÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¤dt Daten aus einem Sheet
  */
 function getSheetData(sheetId) {
   const sheetConfig = CONFIG.SHEETS.find(s => s.sheetId === sheetId);
@@ -163,19 +163,8 @@ function getSheetData(sheetId) {
   const data = sheet.getDataRange().getValues();
   const headers = data[0];
   
-  // Header-Mapping
-  const colIndex = {
-    datum: headers.indexOf(CONFIG.COLUMNS.DATUM),
-    kundenname: headers.indexOf(CONFIG.COLUMNS.KUNDENNAME),
-    betrag: headers.indexOf(CONFIG.COLUMNS.BETRAG),
-    status: headers.indexOf(CONFIG.COLUMNS.STATUS)
-  };
-  
-  // Validierung
-  Object.entries(colIndex).forEach(([key, index]) => {
-    if (index === -1) throw new Error(`Spalte nicht gefunden: ${CONFIG.COLUMNS[key.toUpperCase()]}`);
-  });
-  
+  // Spalten-Mapping (Header oder Spaltenbuchstaben)
+  const colIndex = resolveColumnIndices_(sheetConfig, headers);
   // Daten mappen
   return data.slice(1).map(row => ({
     datum: parseDate(row[colIndex.datum]),
@@ -186,7 +175,7 @@ function getSheetData(sheetId) {
 }
 
 /**
- * Berechnet Stats fÃ¼r einen Zeitraum
+ * Berechnet Stats fÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¼r einen Zeitraum
  */
 function calculatePeriodStats(data, period) {
   const now = new Date();
@@ -237,7 +226,7 @@ function calculatePeriodStats(data, period) {
     endDate: Utilities.formatDate(endDate, CONFIG.TIMEZONE, 'yyyy-MM-dd')
   };
   
-  // Bei "heute" auch die Liste der Angebote zurÃ¼ckgeben
+  // Bei "heute" auch die Liste der Angebote zurÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¼ckgeben
   if (period === 'today') {
     result.angebote = filtered.map(row => ({
       datum: Utilities.formatDate(row.datum, CONFIG.TIMEZONE, 'yyyy-MM-dd'),
@@ -284,7 +273,7 @@ function parseDate(value) {
 }
 
 /**
- * Erstellt JSON-Response fÃ¼r Web App
+ * Erstellt JSON-Response fÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¼r Web App
  */
 function createJsonResponse(data) {
   return ContentService
@@ -293,14 +282,14 @@ function createJsonResponse(data) {
 }
 
 // =====================================================================
-// SETUP (einmalig ausführen)
+// SETUP (einmalig ausfÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¼hren)
 // =====================================================================
 
 /**
  * Legt alle in CONFIG.SHEETS definierten Tabs an (falls sie fehlen)
  * und schreibt die Header-Zeile (nur wenn Tab leer ist).
  *
- * Ausführen (lokal): clasp run setupOfferTabs
+ * AusfÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¼hren (lokal): clasp run setupOfferTabs
  * Danach im Apps Script UI das Web-App Deployment aktualisieren.
  */
 function setupOfferTabs() {
@@ -328,7 +317,7 @@ function setupOfferTabs() {
     });
   });
 
-  return { success: true, message: 'Tabs geprüft/angelegt.' };
+  return { success: true, message: 'Tabs geprÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¼ft/angelegt.' };
 }
 
 function ensureTab_(spreadsheet, tabName) {
@@ -362,7 +351,7 @@ function formatColumns_(sheet, headers) {
   const betragIndex = headers.indexOf(CONFIG.COLUMNS.BETRAG);
   if (betragIndex !== -1) {
     const col = betragIndex + 1;
-    sheet.getRange(2, col, Math.max(sheet.getMaxRows() - 1, 1), 1).setNumberFormat('#,##0.00 €');
+    sheet.getRange(2, col, Math.max(sheet.getMaxRows() - 1, 1), 1).setNumberFormat('#,##0.00 ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬');
   }
 
   // Format Datum column as date if present
@@ -371,4 +360,70 @@ function formatColumns_(sheet, headers) {
     const col = datumIndex + 1;
     sheet.getRange(2, col, Math.max(sheet.getMaxRows() - 1, 1), 1).setNumberFormat('dd.MM.yyyy');
   }
+}
+/**
+ * Ermittelt Spalten-Indizes (0-basiert) entweder ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¼ber Header-Namen oder ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¼ber Spaltenbuchstaben.
+ * UnterstÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¼tzt pro-sheet Overrides via sheetConfig.columns.
+ */
+function resolveColumnIndices_(sheetConfig, headers) {
+  const columns = (sheetConfig && sheetConfig.columns) ? sheetConfig.columns : CONFIG.COLUMNS;
+
+  const keys = {
+    datum: 'DATUM',
+    kundenname: 'KUNDENNAME',
+    betrag: 'BETRAG',
+    status: 'STATUS'
+  };
+
+  const normalizedHeaders = (headers || []).map(h => String(h || '').trim());
+  const colIndex = {};
+  const missing = [];
+
+  Object.entries(keys).forEach(([field, colKey]) => {
+    const spec = columns[colKey];
+    if (spec === undefined || spec === null || String(spec).trim() === '') {
+      colIndex[field] = -1;
+      missing.push(colKey);
+      return;
+    }
+
+    // Number: allow 1-based (Sheet column numbers) or 0-based
+    if (typeof spec === 'number') {
+      colIndex[field] = spec >= 1 ? (spec - 1) : spec;
+      return;
+    }
+
+    const s = String(spec).trim();
+
+    // Column letters like A, B, AA
+    if (/^[A-Za-z]{1,3}$/.test(s)) {
+      colIndex[field] = columnLetterToIndex_(s);
+      return;
+    }
+
+    // Header name match
+    const idx = normalizedHeaders.findIndex(h => h === s);
+    colIndex[field] = idx;
+  });
+
+  Object.entries(colIndex).forEach(([field, idx]) => {
+    if (idx === -1) {
+      const colKey = keys[field];
+      const spec = (sheetConfig && sheetConfig.columns) ? sheetConfig.columns[colKey] : CONFIG.COLUMNS[colKey];
+      throw new Error('Spalte nicht gefunden: ' + spec);
+    }
+  });
+
+  return colIndex;
+}
+
+function columnLetterToIndex_(letters) {
+  const s = String(letters).trim().toUpperCase();
+  let n = 0;
+  for (let i = 0; i < s.length; i++) {
+    const code = s.charCodeAt(i);
+    if (code < 65 || code > 90) throw new Error('UngÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¼ltiger Spaltenbuchstabe: ' + letters);
+    n = n * 26 + (code - 64);
+  }
+  return n - 1;
 }
