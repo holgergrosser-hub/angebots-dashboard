@@ -1,53 +1,41 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import SheetCard from './SheetCard'
 import SheetDetail from './SheetDetail'
 
 export default function Dashboard({ sheets }) {
   const [selectedSheet, setSelectedSheet] = useState(null)
+  const detailRef = useRef(null)
 
-  // Keep UI in sync with URL so browser back/forward works
+  // Optional: open a sheet directly via URL (?sheet=...)
   useEffect(() => {
-    const syncFromUrl = () => {
-      const sheetId = new URLSearchParams(window.location.search).get('sheet')
-      if (!sheetId) {
-        setSelectedSheet(null)
-        return
-      }
-
-      const match = sheets.find(s => s.id === sheetId)
-      if (match) setSelectedSheet(match)
-    }
-
-    syncFromUrl()
-
-    const onPopState = () => syncFromUrl()
-    window.addEventListener('popstate', onPopState)
-    return () => window.removeEventListener('popstate', onPopState)
+    const sheetId = new URLSearchParams(window.location.search).get('sheet')
+    if (!sheetId) return
+    const match = sheets.find(s => s.id === sheetId)
+    if (match) setSelectedSheet(match)
   }, [sheets])
+
+  useEffect(() => {
+    if (!selectedSheet) return
+    // scroll to evaluations so user immediately sees them
+    setTimeout(() => {
+      detailRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 0)
+  }, [selectedSheet?.id])
 
   const openSheet = (sheet) => {
     setSelectedSheet(sheet)
+
+    // keep URL in sync (handy for reload/share) but UI doesn't rely on it
     const url = new URL(window.location.href)
     url.searchParams.set('sheet', sheet.id)
-    window.history.pushState({}, '', url)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    window.history.replaceState({}, '', url)
   }
 
   const closeSheet = () => {
     const url = new URL(window.location.href)
     url.searchParams.delete('sheet')
-    window.history.pushState({}, '', url)
+    window.history.replaceState({}, '', url)
     setSelectedSheet(null)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-
-  if (selectedSheet) {
-    return (
-      <SheetDetail
-        sheet={selectedSheet}
-        onBack={closeSheet}
-      />
-    )
   }
 
   return (
@@ -55,7 +43,7 @@ export default function Dashboard({ sheets }) {
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-gray-900">Alle Sheets</h2>
         <p className="text-gray-600 mt-1">
-          Klicke auf ein Sheet für detaillierte Auswertungen
+          Klicke auf ein Sheet für die Auswertung
         </p>
       </div>
 
@@ -78,6 +66,25 @@ export default function Dashboard({ sheets }) {
               onClick={() => openSheet(sheet)}
             />
           ))}
+        </div>
+      )}
+
+      {/* Evaluations */}
+      {selectedSheet && (
+        <div ref={detailRef} className="mt-10">
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="text-xl font-bold text-gray-900">
+              Auswertung: {selectedSheet.name}
+            </h3>
+            <button
+              onClick={closeSheet}
+              className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50"
+            >
+              Schließen
+            </button>
+          </div>
+
+          <SheetDetail sheet={selectedSheet} onBack={closeSheet} hideBack />
         </div>
       )}
     </div>
