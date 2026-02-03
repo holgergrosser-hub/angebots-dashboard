@@ -40,16 +40,16 @@ const CONFIG = {
     },
     {
       sheetId: 'qm-system-angebot',
-      sheetName: 'QM Sytem Angebot',
+      sheetName: 'AngeboteferdieZertifizierung',
       spreadsheetId: '1yrY6xPz34UH2PtESTPanxfMNxas6mtkpvmodg882p8U',
-      tabName: 'Tabellenblatt1',
+      tabName: 'AngeboteferdieZertifizierung',
       inputUrl: 'https://qm-guru-angebote-9001.netlify.app/',
       offerUrl: 'https://docs.google.com/spreadsheets/d/1yrY6xPz34UH2PtESTPanxfMNxas6mtkpvmodg882p8U/edit?gid=0#gid=0',
       columns: {
-        DATUM: 'C',
-        KUNDENNAME: 'D',
-        BETRAG: 'U',
-        STATUS: 'Z'
+        DATUM: 'P',
+        KUNDENNAME: 'A',
+        BETRAG: 'F',
+        STATUS: 'AB'
       },
       aktiv: true
     }
