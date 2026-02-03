@@ -6,7 +6,9 @@ exports.handler = async (event) => {
   const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',
-    'Access-Control-Allow-Methods': 'GET,OPTIONS'
+    'Access-Control-Allow-Methods': 'GET,OPTIONS',
+    'Cache-Control': 'no-store, max-age=0',
+    Pragma: 'no-cache'
   };
 
   if (event.httpMethod === 'OPTIONS') {

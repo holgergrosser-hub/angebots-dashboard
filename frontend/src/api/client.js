@@ -19,6 +19,9 @@ export async function fetchAPI(action, params = {}) {
     // URL mit Query-Parametern bauen
     const url = new URL(API_URL, window.location.origin)
     url.searchParams.append('action', action)
+
+    // Cache-Busting (verhindert alte Werte durch Browser/Edge-Caches)
+    url.searchParams.append('_ts', String(Date.now()))
     
     Object.entries(params).forEach(([key, value]) => {
       url.searchParams.append(key, value)
@@ -31,6 +34,7 @@ export async function fetchAPI(action, params = {}) {
     // - GET-Request verwenden
     const response = await fetch(url.toString(), {
       method: 'GET',
+      cache: 'no-store'
       // Keine Headers bei Apps Script!
     })
     
