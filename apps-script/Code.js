@@ -21,6 +21,10 @@ function doGet(e) {
       case 'getCrmCompanies':
         response = getCrmCompanies_();
         break;
+
+      case 'getCrmCompaniesMeta':
+        response = getCrmCompaniesMeta_();
+        break;
       
       case 'getStats':
         const sheetId = e.parameter.sheetId;
@@ -54,6 +58,54 @@ function doGet(e) {
 }
 
 /**
+ * Liefert Firmen inkl. Metadaten aus dem CRM "Super Master".
+ * Erwartet: Firmenname in Spalte A, Webseite in Spalte C, PLZ in Spalte CA (ab Zeile 2).
+ */
+function getCrmCompaniesMeta_() {
+  const cache = CacheService.getScriptCache();
+  const cacheKey = 'crm_companies_meta_v1';
+
+  const cached = cache.get(cacheKey);
+  if (cached) {
+    return { success: true, data: JSON.parse(cached), cached: true };
+  }
+
+  if (!CONFIG.CRM_SUPER_MASTER_ID) throw new Error('CRM_SUPER_MASTER_ID fehlt in Config');
+  if (!CONFIG.CRM_SHEET_NAME) throw new Error('CRM_SHEET_NAME fehlt in Config');
+  if (!CONFIG.CRM_COLUMNS) throw new Error('CRM_COLUMNS fehlt in Config');
+
+  const ss = SpreadsheetApp.openById(CONFIG.CRM_SUPER_MASTER_ID);
+  const sheet = ss.getSheetByName(CONFIG.CRM_SHEET_NAME);
+  if (!sheet) throw new Error('CRM Tab nicht gefunden: ' + CONFIG.CRM_SHEET_NAME);
+
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) {
+    cache.put(cacheKey, JSON.stringify([]), 300);
+    return { success: true, data: [] };
+  }
+
+  // Read only the needed columns via display values (keeps PLZ formatting).
+  const n = lastRow - 1;
+  const names = sheet.getRange(2, columnLetterToIndex_(CONFIG.CRM_COLUMNS.COMPANY_NAME) + 1, n, 1).getDisplayValues();
+  const webs = sheet.getRange(2, columnLetterToIndex_(CONFIG.CRM_COLUMNS.WEBSEITE) + 1, n, 1).getDisplayValues();
+  const plzs = sheet.getRange(2, columnLetterToIndex_(CONFIG.CRM_COLUMNS.PLZ) + 1, n, 1).getDisplayValues();
+
+  const list = [];
+  for (let i = 0; i < n; i++) {
+    const name = names[i] && names[i][0] != null ? String(names[i][0]).trim() : '';
+    if (!name) continue;
+
+    const webseite = webs[i] && webs[i][0] != null ? String(webs[i][0]).trim() : '';
+    const plz = plzs[i] && plzs[i][0] != null ? String(plzs[i][0]).trim() : '';
+
+    list.push({ name, webseite, plz });
+  }
+
+  cache.put(cacheKey, JSON.stringify(list), 300);
+  return { success: true, data: list };
+}
+
+/**
  * Liefert die Firmenliste aus dem CRM "Super Master".
  * Erwartet: Tab CONFIG.CRM_SHEET_NAME, Firmennamen in Spalte A ab Zeile 2.
  */
@@ -79,7 +131,10 @@ function getCrmCompanies_() {
     return { success: true, data: [] };
   }
 
-  const values = sheet.getRange(2, 1, lastRow - 1, 1).getValues();
+  const nameCol = (CONFIG.CRM_COLUMNS && CONFIG.CRM_COLUMNS.COMPANY_NAME) ? CONFIG.CRM_COLUMNS.COMPANY_NAME : 'A';
+  const values = sheet
+    .getRange(2, columnLetterToIndex_(nameCol) + 1, lastRow - 1, 1)
+    .getValues();
   const list = values
     .map(r => (r && r[0] != null ? String(r[0]).trim() : ''))
     .filter(Boolean);
@@ -241,9 +296,14 @@ function searchCustomers(query) {
     try {
       const data = getSheetData(sheet.sheetId);
       
-      const matches = data.filter(row => 
-        row.kundenname && row.kundenname.toLowerCase().includes(searchQuery)
-      );
+      const matches = data.filter(row => {
+        const kundenname = row.kundenname ? String(row.kundenname) : '';
+        const webseite = row.webseite ? String(row.webseite) : '';
+        const plz = row.plz ? String(row.plz) : '';
+
+        const haystack = `${kundenname} ${webseite} ${plz}`.toLowerCase();
+        return haystack.includes(searchQuery);
+      });
       
       if (matches.length > 0) {
         results.push({
@@ -297,7 +357,11 @@ function getSheetData(sheetId) {
     datum: parseDate(row[colIndex.datum]),
     kundenname: row[colIndex.kundenname] || '',
     betrag: parseFloat(row[colIndex.betrag]) || 0,
-    status: row[colIndex.status] || ''
+    status: row[colIndex.status] || '',
+
+    // Optional: für Suche
+    webseite: colIndex.webseite >= 0 ? (row[colIndex.webseite] || '') : '',
+    plz: colIndex.plz >= 0 ? (row[colIndex.plz] || '') : ''
   })).filter(row => row.datum); // Nur Zeilen mit Datum
 }
 
@@ -496,21 +560,41 @@ function resolveColumnIndices_(sheetConfig, headers) {
   const columns = (sheetConfig && sheetConfig.columns) ? sheetConfig.columns : CONFIG.COLUMNS;
 
   const keys = {
-    datum: 'DATUM',
-    kundenname: 'KUNDENNAME',
-    betrag: 'BETRAG',
-    status: 'STATUS'
+    datum: { key: 'DATUM', required: true },
+    kundenname: { key: 'KUNDENNAME', required: true },
+    betrag: { key: 'BETRAG', required: true },
+    status: { key: 'STATUS', required: true },
+
+    // Optional: wird nur für Suche genutzt
+    webseite: {
+      key: 'WEBSEITE',
+      required: false,
+      headerFallbacks: ['Webseite', 'Website', 'Webpage', 'Homepage', 'URL']
+    },
+    plz: {
+      key: 'PLZ',
+      required: false,
+      headerFallbacks: ['PLZ', 'PLZ_Ort', 'PLZ Ort', 'Postleitzahl']
+    }
   };
 
   const normalizedHeaders = (headers || []).map(h => String(h || '').trim());
   const colIndex = {};
-  const missing = [];
 
-  Object.entries(keys).forEach(([field, colKey]) => {
+  Object.entries(keys).forEach(([field, def]) => {
+    const colKey = def.key;
     const spec = columns[colKey];
     if (spec === undefined || spec === null || String(spec).trim() === '') {
+      if (!def.required) {
+        const fallbacks = Array.isArray(def.headerFallbacks) ? def.headerFallbacks : [];
+        const idx = fallbacks
+          .map(name => normalizedHeaders.findIndex(h => h === name))
+          .find(i => i >= 0);
+        colIndex[field] = (idx === undefined ? -1 : idx);
+        return;
+      }
+
       colIndex[field] = -1;
-      missing.push(colKey);
       return;
     }
 
@@ -533,9 +617,12 @@ function resolveColumnIndices_(sheetConfig, headers) {
     colIndex[field] = idx;
   });
 
-  Object.entries(colIndex).forEach(([field, idx]) => {
+  // Validate required only
+  Object.entries(keys).forEach(([field, def]) => {
+    if (!def.required) return;
+    const idx = colIndex[field];
     if (idx === -1) {
-      const colKey = keys[field];
+      const colKey = def.key;
       const spec = (sheetConfig && sheetConfig.columns) ? sheetConfig.columns[colKey] : CONFIG.COLUMNS[colKey];
       throw new Error('Spalte nicht gefunden: ' + spec);
     }

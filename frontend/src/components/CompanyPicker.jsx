@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { getCrmCompanies } from '../api/client'
+import { getCrmCompanies, getCrmCompaniesMeta } from '../api/client'
 
 export default function CompanyPicker({ onPick }) {
   const [companies, setCompanies] = useState([])
@@ -9,16 +9,47 @@ export default function CompanyPicker({ onPick }) {
   const [value, setValue] = useState('')
   const [filter, setFilter] = useState('')
 
+  const normalized = useMemo(() => {
+    return (Array.isArray(companies) ? companies : []).map((it) => {
+      if (typeof it === 'string') {
+        return { name: it.trim(), webseite: '', plz: '' }
+      }
+      const name = String(it?.name ?? it?.companyName ?? it?.company ?? '').trim()
+      const webseite = String(it?.webseite ?? it?.website ?? it?.webpage ?? '').trim()
+      const plz = String(it?.plz ?? it?.postleitzahl ?? it?.zip ?? '').trim()
+      return { name, webseite, plz }
+    }).filter(r => r.name)
+  }, [companies])
+
   const filtered = useMemo(() => {
     const q = (filter || '').trim().toLowerCase()
-    if (!q) return companies
-    return companies.filter(c => c.toLowerCase().includes(q))
-  }, [companies, filter])
+    if (!q) return normalized
+    return normalized.filter(c => {
+      const hay = `${c.name} ${c.webseite} ${c.plz}`.toLowerCase()
+      return hay.includes(q)
+    })
+  }, [normalized, filter])
+
+  const selectedMeta = useMemo(() => {
+    const v = (value || '').trim().toLowerCase()
+    if (!v) return null
+    return normalized.find(c => c.name.toLowerCase() === v) || null
+  }, [normalized, value])
 
   async function load() {
     try {
       setLoading(true)
       setError(null)
+      try {
+        const meta = await getCrmCompaniesMeta()
+        if (Array.isArray(meta) && meta.length > 0 && typeof meta[0] === 'object') {
+          setCompanies(meta)
+          return
+        }
+      } catch {
+        // ignore; fallback to names
+      }
+
       const list = await getCrmCompanies()
       setCompanies(list)
     } catch (err) {
@@ -76,7 +107,7 @@ export default function CompanyPicker({ onPick }) {
               />
               <datalist id="crm-companies">
                 {filtered.slice(0, 500).map((c) => (
-                  <option key={c} value={c} />
+                  <option key={c.name} value={c.name} />
                 ))}
               </datalist>
             </div>
@@ -112,7 +143,23 @@ export default function CompanyPicker({ onPick }) {
 
       {!error && !loading && companies.length > 0 ? (
         <div className="mt-3 text-xs text-gray-500">
-          {companies.length} Firmen geladen
+          {normalized.length} Firmen geladen
+        </div>
+      ) : null}
+
+      {selectedMeta && (selectedMeta.webseite || selectedMeta.plz) ? (
+        <div className="mt-2 text-xs text-gray-600">
+          {selectedMeta.plz ? <span className="mr-3">PLZ: {selectedMeta.plz}</span> : null}
+          {selectedMeta.webseite ? (
+            <a
+              href={selectedMeta.webseite.startsWith('http') ? selectedMeta.webseite : `https://${selectedMeta.webseite}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary-600 hover:text-primary-700"
+            >
+              Webseite öffnen
+            </a>
+          ) : null}
         </div>
       ) : null}
     </div>

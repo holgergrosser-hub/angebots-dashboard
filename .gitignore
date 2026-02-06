@@ -35,3 +35,6 @@ yarn-error.log*
 .clasp.json
 # Note: .clasp.json enthält sensible Script-ID, daher in .gitignore
 # Erstelle eine .clasp.json.example für andere Entwickler
+
+# Keep separate repo
+bafa-manager/

@@ -16,6 +16,14 @@ const CONFIG = {
   CRM_SUPER_MASTER_ID: '1FWbeX3YeK9Uidyn9obKJ7z-J-zXX1h5PsXcfk_YHAyU',
   CRM_SHEET_NAME: 'Super Master',
 
+  // CRM Spalten (Super Master)
+  // Hinweis: Webseite = C, PLZ = CA
+  CRM_COLUMNS: {
+    COMPANY_NAME: 'A',
+    WEBSEITE: 'C',
+    PLZ: 'CA'
+  },
+
   TIMEZONE: 'Europe/Berlin',
 
   // Default: Spalten über Header-Namen (Kopfzeile)
@@ -24,7 +32,12 @@ const CONFIG = {
     DATUM: 'Datum',
     KUNDENNAME: 'Kundenname',
     BETRAG: 'Betrag',
-    STATUS: 'Status'
+    STATUS: 'Status',
+
+    // Optional (für Suche): wenn vorhanden werden diese Felder durchsucht.
+    // Du kannst pro Sheet alternativ auch Spaltenbuchstaben setzen.
+    WEBSEITE: 'Webseite',
+    PLZ: 'PLZ'
   },
 
   SHEETS: [

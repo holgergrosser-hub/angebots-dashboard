@@ -83,6 +83,15 @@ export async function getCrmCompanies() {
 }
 
 /**
+ * Holt Firmenliste inkl. Webseite/PLZ aus dem CRM (Super Master)
+ * @returns {Promise<Array<{name: string, webseite: string, plz: string}>>}
+ */
+export async function getCrmCompaniesMeta() {
+  const res = await fetchAPI('getCrmCompaniesMeta')
+  return Array.isArray(res?.data) ? res.data : []
+}
+
+/**
  * Formatiert Betrag als WÃƒÂ¤hrung
  * 
  * @param {number} amount - Betrag

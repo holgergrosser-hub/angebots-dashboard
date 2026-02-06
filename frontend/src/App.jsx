@@ -116,6 +116,25 @@ function AppInner() {
 
             <div className="flex items-center gap-4">
               <span className="text-sm text-gray-500">{sheetCountLabel}</span>
+
+              <a
+                href="https://docs.google.com/spreadsheets/d/1V_02PcvdCON0_HdS_Im7nVJ9RKav99_2OCpwfadj94I/edit?usp=sharing"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                title="Kundentabelle (Google Sheet) öffnen"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+                  />
+                </svg>
+                Kundentabelle öffnen
+              </a>
+
               <button
                 onClick={loadSheets}
                 className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
@@ -159,6 +178,9 @@ function AppInner() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <p className="text-center text-gray-500 text-sm">
             Angebots-Dashboard © {new Date().getFullYear()}
+          </p>
+          <p className="text-center text-gray-400 text-xs mt-1">
+            Revision: {import.meta.env.VITE_APP_REVISION} · Build: {import.meta.env.VITE_APP_BUILD_TIME}
           </p>
         </div>
       </footer>
