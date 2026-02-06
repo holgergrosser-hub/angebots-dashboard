@@ -11,6 +11,11 @@
 
 const CONFIG = {
 
+  // CRM Super Master (Firmenliste)
+  // Spalte A ab Zeile 2: Firmennamen
+  CRM_SUPER_MASTER_ID: '1FWbeX3YeK9Uidyn9obKJ7z-J-zXX1h5PsXcfk_YHAyU',
+  CRM_SHEET_NAME: 'Super Master',
+
   TIMEZONE: 'Europe/Berlin',
 
   // Default: Spalten über Header-Namen (Kopfzeile)

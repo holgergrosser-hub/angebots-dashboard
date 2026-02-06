@@ -6,6 +6,7 @@ import ErrorBoundary from './components/ErrorBoundary'
 import LoadingSpinner from './components/LoadingSpinner'
 import SearchBar from './components/SearchBar'
 import SearchResults from './components/SearchResults'
+import CompanyPicker from './components/CompanyPicker'
 
 function AppInner() {
   const [sheets, setSheets] = useState([])
@@ -65,6 +66,12 @@ function AppInner() {
     setSearchQuery('')
     setSearchResults(null)
     setSearchError(null)
+  }
+
+  function setQueryAndSearch(nextQuery) {
+    const q = (nextQuery || '').trim()
+    setSearchQuery(q)
+    handleSearch(q)
   }
 
   if (loading) {
@@ -127,7 +134,15 @@ function AppInner() {
           </div>
 
           <div className="mt-6">
-            <SearchBar onSearch={handleSearch} initialQuery={searchQuery} />
+            <SearchBar
+              onSearch={handleSearch}
+              query={searchQuery}
+              onQueryChange={setSearchQuery}
+            />
+
+            <div className="mt-4">
+              <CompanyPicker onPick={setQueryAndSearch} />
+            </div>
           </div>
         </div>
       </header>

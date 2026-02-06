@@ -1,7 +1,4 @@
-import { useState } from 'react'
-
-export default function SearchBar({ onSearch, initialQuery = '' }) {
-  const [query, setQuery] = useState(initialQuery)
+export default function SearchBar({ onSearch, query, onQueryChange }) {
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -9,7 +6,7 @@ export default function SearchBar({ onSearch, initialQuery = '' }) {
   }
 
   const handleClear = () => {
-    setQuery('')
+    onQueryChange('')
     onSearch('')
   }
 
@@ -25,7 +22,7 @@ export default function SearchBar({ onSearch, initialQuery = '' }) {
         <input
           type="text"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => onQueryChange(e.target.value)}
           placeholder="Kunde suchen über alle Sheets..."
           className="block w-full pl-10 pr-24 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
         />

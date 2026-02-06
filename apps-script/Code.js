@@ -17,6 +17,10 @@ function doGet(e) {
       case 'getSheets':
         response = getSheetsList();
         break;
+
+      case 'getCrmCompanies':
+        response = getCrmCompanies_();
+        break;
       
       case 'getStats':
         const sheetId = e.parameter.sheetId;
@@ -47,6 +51,41 @@ function doGet(e) {
       error: error.toString()
     });
   }
+}
+
+/**
+ * Liefert die Firmenliste aus dem CRM "Super Master".
+ * Erwartet: Tab CONFIG.CRM_SHEET_NAME, Firmennamen in Spalte A ab Zeile 2.
+ */
+function getCrmCompanies_() {
+  const cache = CacheService.getScriptCache();
+  const cacheKey = 'crm_companies_v1';
+
+  const cached = cache.get(cacheKey);
+  if (cached) {
+    return { success: true, data: JSON.parse(cached), cached: true };
+  }
+
+  if (!CONFIG.CRM_SUPER_MASTER_ID) throw new Error('CRM_SUPER_MASTER_ID fehlt in Config');
+  if (!CONFIG.CRM_SHEET_NAME) throw new Error('CRM_SHEET_NAME fehlt in Config');
+
+  const ss = SpreadsheetApp.openById(CONFIG.CRM_SUPER_MASTER_ID);
+  const sheet = ss.getSheetByName(CONFIG.CRM_SHEET_NAME);
+  if (!sheet) throw new Error('CRM Tab nicht gefunden: ' + CONFIG.CRM_SHEET_NAME);
+
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) {
+    cache.put(cacheKey, JSON.stringify([]), 300);
+    return { success: true, data: [] };
+  }
+
+  const values = sheet.getRange(2, 1, lastRow - 1, 1).getValues();
+  const list = values
+    .map(r => (r && r[0] != null ? String(r[0]).trim() : ''))
+    .filter(Boolean);
+
+  cache.put(cacheKey, JSON.stringify(list), 300);
+  return { success: true, data: list };
 }
 
 // =============================================================================

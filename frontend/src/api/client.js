@@ -74,6 +74,15 @@ export async function searchCustomers(query) {
 }
 
 /**
+ * Holt die Firmenliste aus dem CRM (Super Master)
+ * @returns {Promise<string[]>}
+ */
+export async function getCrmCompanies() {
+  const res = await fetchAPI('getCrmCompanies')
+  return Array.isArray(res?.data) ? res.data : []
+}
+
+/**
  * Formatiert Betrag als WÃƒÂ¤hrung
  * 
  * @param {number} amount - Betrag
